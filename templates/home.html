@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="text-3xl mb-6">Latest News</h1>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for news in page_obj %}
+      <div class="bg-white p-6 shadow-lg rounded-xl hover:shadow-xl transition duration-300 ease-in-out">
+        <h2 class="text-xl font-semibold mb-2">{{ news.1 }}</h2>
+        <p class="text-gray-600 mb-4">{{ news.1|truncatewords:20 }}</p>
+        <a href="{% url 'news_detail' forloop.counter %}" class="text-blue-600 font-medium hover:underline">Read more →</a>
+      </div>
+    {% empty %}
+      <p>No news available.</p>
+    {% endfor %}
+  </div>
+
+  <div class="mt-8 flex justify-center">
+    {% include 'pagination.html' %}
+  </div>
+{% endblock %}

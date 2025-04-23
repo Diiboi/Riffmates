@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News Site</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <header class="bg-blue-600 text-white py-4">
+    <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <a href="/"><h1 class="text-2xl font-bold">News Site</h1></a>
+      <nav class="flex space-x-6">
+        <a href="/" class="hover:text-gray-200">Home</a>
+        <a href="/news/advanced/" class="hover:text-gray-200">Advanced News</a>
+        <form action="/search/" method="get" class="flex items-center space-x-2">
+          <input type="text" name="q" class="px-3 py-2 rounded" placeholder="Search news" />
+          <button type="submit" class="px-4 py-2 bg-blue-500 rounded text-white">Search</button>
+        </form>
+      </nav>
+    </div>
+  </header>
+
+  <main class="py-6 px-4">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+</body>
+</html>
