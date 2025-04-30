@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 p-6 bg-white rounded-lg shadow">
+    <h1 class="text-3xl font-bold text-purple-800 mb-6">{{ band.name }}</h1>
+</div>
+
+<div class="p-6 bg-white rounded-lg shadow">
+    <h2 class="text-2xl font-semibold text-purple-800 mb-4 border-b border-orange-500 pb-2">Members</h2>
+    <ul class="space-y-2">
+        {% for musician in band.musicians.all %}
+        <li class="pl-4 py-2 border-l-4 border-orange-500 hover:bg-gray-50">
+            <a href="{% url 'musician' musician.id %}" class="font-medium">
+                {{ musician.first_name }} {{ musician.last_name }}
+            </a>
+            <span class="text-gray-600 text-sm">(born {{ musician.birth|date:"F j, Y" }})</span>
+        </li>
+        {% empty %}
+        <li class="text-gray-500">No members in this band</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
