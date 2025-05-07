@@ -4,20 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Database</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Or use your compiled version if you set up the build process -->
-    <!-- <link href="/static/css/tailwind.css" rel="stylesheet"> -->
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
     <header class="bg-gradient-to-r from-purple-800 to-purple-600 text-white shadow-md">
         <div class="container mx-auto px-4 py-6">
-            <h1 class="text-3xl font-bold">MusiX</h1>
+            <h1 class="text-3xl font-bold"><a href="{% url 'home' %}">MusiX</a></h1>
         </div>
     </header>
     
-    <!-- Navigation -->
     <nav class="bg-gray-900 text-white">
         <div class="container mx-auto px-4 py-3">
             <a href="{% url 'musicians' %}" class="mr-4 px-3 py-1 rounded hover:bg-orange-500 transition">Musicians</a>
@@ -26,7 +21,6 @@
         </div>
     </nav>
     
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-6">
         <div class="bg-white rounded-lg shadow p-6">
             {% block content %}
@@ -34,7 +28,6 @@
         </div>
     </main>
     
-    <!-- Footer -->
     <footer class="bg-gray-900 text-white text-center py-6 mt-8">
         <div class="container mx-auto px-4">
             <p>&copy; 2023 Music Database. All rights reserved.</p>
