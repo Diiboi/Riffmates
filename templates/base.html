@@ -9,12 +9,13 @@
 <body class="bg-gray-50">
     <header class="bg-gradient-to-r from-purple-800 to-purple-600 text-white shadow-md">
         <div class="container mx-auto px-4 py-6">
-            <h1 class="text-3xl font-bold"><a href="{% url 'home' %}">MusiX</a></h1>
+            <h1 class="text-3xl font-bold"><a href="{% url 'home' %}">RIFFMATE</a></h1>
         </div>
     </header>
     
     <nav class="bg-gray-900 text-white">
         <div class="container mx-auto px-4 py-3">
+            <a href="{% url 'home' %}" class="mr-4 px-3 py-1 rounded hover:bg-orange-500 transition">News</a>
             <a href="{% url 'musicians' %}" class="mr-4 px-3 py-1 rounded hover:bg-orange-500 transition">Musicians</a>
             <a href="{% url 'bands' %}" class="mr-4 px-3 py-1 rounded hover:bg-orange-500 transition">Bands</a>
             <a href="{% url 'venues' %}" class="px-3 py-1 rounded hover:bg-orange-500 transition">Venues</a>
