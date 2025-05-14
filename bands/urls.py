@@ -6,4 +6,5 @@ urlpatterns = [
     path('bands/', views.bands, name='bands'),
     path('band/<int:band_id>/', views.band, name='band'),
     path('venues/', views.venues, name='venues'),
+    path('musician_restricted/<int:musician_id>/',views.musician_restricted,  name='musician_restricted'),
 ]
