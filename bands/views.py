@@ -1,8 +1,11 @@
 from django.shortcuts import render,get_object_or_404
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 from django.http import Http404
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from  bands.models import Musician, Band,Venue
+from  bands.models import Musician, Band,Venue,UserProfile
 
 
 @login_required 
@@ -54,6 +57,7 @@ def musician(request,musician_id):
     }
     return render(request,'musician.xhtml',data)
 
+@login_required
 def musicians(request):
 
     all_musicians = Musician.objects.all().order_by('last_name')
@@ -107,3 +111,13 @@ def venues(request):
     }
     return render(request, 'venues.xhtml', data)
 
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, **kwargs):
+        if kwargs['created'] and not kwargs['raw']:
+            user = kwargs['instance']
+            try:
+                UserProfile.objects.get(user=user)
+            except UserProfile.DoesNotExist:
+                UserProfile.objects.create(user=user)
+            
