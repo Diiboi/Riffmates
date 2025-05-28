@@ -25,6 +25,7 @@ from home import views as search_views
 from bands import views as band_views
 urlpatterns = [
     path('bands/',include("bands.urls")),
+    path('content/',include("content.urls")),
     path('admin/', admin.site.urls),
     path('accounts/',include('django.contrib.auth.urls')),
     path('credits/',home_views.credits,name='credits'),
