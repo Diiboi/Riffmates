@@ -4,7 +4,6 @@ from content.models import MusicianBandChoice,SeekingAd
 from django.contrib.auth.decorators import login_required
 from content.forms import SeekingAdForm
 from content.models import MusicianBandChoice,SeekingAd
-
 from content.forms import CommentForm
 
 def comment(request):
@@ -50,11 +49,20 @@ def seeking_ad(request,ad_id=0):
              form = SeekingAdForm()
         else:
             ad = get_object_or_404(SeekingAd, id=ad_id, owner=request.user)
-            form = SeekingAdForm(isinstance=ad)
-    else:
+            form = SeekingAdForm(instance=ad)
+    if request.method == 'POST':
         if ad_id == 0:
             form = SeekingAdForm(request.POST)
         else:
             ad = get_object_or_404(SeekingAd, id=ad_id, owner=request.user)
             form = SeekingAdForm(request.POST, instance=ad)
+        if form.is_valid():
+            ad = form.save(commit=False)
+            ad.owner = request.user
+            ad.save()
+            return redirect('list_ads')
+    data ={
+        "form":form,
+    }
+    return render(request,"seeking_ad.html",data)
    

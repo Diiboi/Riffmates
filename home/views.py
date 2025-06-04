@@ -52,4 +52,5 @@ def AboutPage(request):
             'Massage':'Welcome to my website'
             })
 
-
+def index(request):
+    return render(request, 'index.html')

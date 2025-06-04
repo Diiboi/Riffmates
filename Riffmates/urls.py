@@ -30,7 +30,7 @@ urlpatterns = [
     path('accounts/',include('django.contrib.auth.urls')),
     path('credits/',home_views.credits,name='credits'),
     path('about/',about_views.AboutPage,name='about'),
-    path('',homepage_views.home,name='home'),
+    path('',homepage_views.index,name='index'),
     path('news/advanced/', advanced_views.news_advanced, name='news_advanced'),  
     path('news/<int:id>/', details_views.news_detail, name='news_detail'), 
     path('search/', search_views.search_results, name='search_results'),  
