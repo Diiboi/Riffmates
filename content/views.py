@@ -43,26 +43,34 @@ def list_ads(request):
     return render(request, 'list_ads.html', data)
 
 @login_required
-def seeking_ad(request,ad_id=0):
-    if request.method == 'GET':
-        if ad_id == 0:
-             form = SeekingAdForm()
-        else:
-            ad = get_object_or_404(SeekingAd, id=ad_id, owner=request.user)
-            form = SeekingAdForm(instance=ad)
+def seeking_ad(request, ad_id=0):
+    ad = None
+    
+    # Get the ad instance if editing
+    if ad_id != 0:
+        ad = get_object_or_404(SeekingAd, id=ad_id)
+        # Check permissions - owner or staff
+        if not (request.user == ad.owner or request.user.is_staff):
+            raise Http404("Permission denied")
+    
+    # Handle form submission
     if request.method == 'POST':
-        if ad_id == 0:
-            form = SeekingAdForm(request.POST)
-        else:
-            ad = get_object_or_404(SeekingAd, id=ad_id, owner=request.user)
-            form = SeekingAdForm(request.POST, instance=ad)
+        form = SeekingAdForm(request.POST, instance=ad)
         if form.is_valid():
             ad = form.save(commit=False)
-            ad.owner = request.user
+            # Only set owner for new ads (don't override on edit)
+            if ad_id == 0:
+                ad.owner = request.user
             ad.save()
             return redirect('list_ads')
-    data ={
-        "form":form,
+    else:
+        # GET request - initialize form
+        form = SeekingAdForm(instance=ad)
+    
+    context = {
+        "form": form,
+        "ad": ad,  # Pass the ad object to template
+        "is_new": ad_id == 0  # Helpful for template logic
     }
-    return render(request,"seeking_ad.html",data)
+    return render(request, "seeking_ad.html", context)
    

@@ -1,12 +1,92 @@
 {% extends "base.html" %}
+
 {% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-purple-800">
+            {% if is_new %}Create{% else %}Edit{% endif %} Seeking Ad
+        </h2>
+        <a href="{% url 'list_ads' %}" class="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Ads
+        </a>
+    </div>
 
-<h1>Seeking Ad</h1>
+    <form method="post" class="bg-white rounded-xl shadow-md p-6">
+        {% csrf_token %}
+        
+        <div class="space-y-4">
+            {% for field in form %}
+            <div class="space-y-2">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                    <span class="text-red-500">*</span>
+                    {% endif %}
+                </label>
+                
+                {% if field.field.widget.input_type == 'select' %}
+                <select name="{{ field.name }}" id="{{ field.id_for_label }}" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    {% for value, label in field.field.choices %}
+                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <input type="{{ field.field.widget.input_type }}" 
+                       name="{{ field.name }}" 
+                       id="{{ field.id_for_label }}" 
+                       value="{{ field.value|default_if_none:'' }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+                {% endif %}
+                
+                {% if field.help_text %}
+                <p class="text-xs text-gray-500">{{ field.help_text }}</p>
+                {% endif %}
+                
+                {% for error in field.errors %}
+                <p class="text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="save">
-</form>
+        <div class="mt-6 flex justify-end space-x-3">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md shadow-sm transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Save Ad
+            </button>
+            
+            <a href="{% url 'list_ads' %}" 
+               class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition-colors">
+                Cancel
+            </a>
+        </div>
+    </form>
+    
+    {% if not is_new and request.user.is_staff %}
+    <div class="mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+        <p class="text-sm text-yellow-700">
+            <span class="font-medium">Admin Note:</span> Editing ad owned by {{ ad.owner.username }}
+        </p>
+    </div>
+    {% endif %}
+</div>
 
-{% endblock content %}
+<style>
+    /* Custom styling for textareas */
+    textarea {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500;
+        min-height: 120px;
+    }
+    
+    /* Style for checkbox inputs */
+    input[type="checkbox"] {
+        @apply h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded;
+    }
+</style>
+{% endblock %}

@@ -15,7 +15,11 @@ class SeekingAd(models.Model):
     musician=models.ForeignKey(Musician, on_delete=models.SET_NULL, null=True, blank=True)
     band=models.ForeignKey(Band, on_delete=models.SET_NULL, blank=True, null=True)
     content = models.TextField()
-    
+    owner = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='seeking_ads'
+    )
     class Meta:
         ordering = ['date',]
 

@@ -4,9 +4,9 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.http import Http404
 from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from  bands.models import Musician, Band,Venue,UserProfile
-from bands.forms import VenueForm
+from bands.forms import VenueForm,MusicianForm
 
 
 @login_required 
@@ -53,10 +53,42 @@ def musician_restricted(request, musician_id):
 
 def musician(request,musician_id):
     musician = get_object_or_404(Musician,id= musician_id)
-    data ={
+    can_edit = False
+    
+    if request.user.is_authenticated:
+        if request.user.is_staff or (hasattr(request.user, 'userprofile') and 
+                                   request.user.userprofile.musicians.filter(id=musician_id).exists()):
+            can_edit = True
+    
+    return render(request, 'musician.xhtml', {
         'musician': musician,
-    }
-    return render(request,'musician.xhtml',data)
+        'can_edit': can_edit
+    })
+
+@login_required
+def edit_musician(request, musician_id=None):
+    musician = None
+    if musician_id:
+        musician = get_object_or_404(Musician, id=musician_id)
+        if not (request.user.is_staff or 
+               request.user.userprofile.musicians.filter(id=musician_id).exists()):
+            raise Http404("Permission denied")
+
+    if request.method == 'POST':
+        form = MusicianForm(request.POST, request.FILES, instance=musician)
+        if form.is_valid():
+            musician = form.save(commit=False)
+            if not musician_id:  # Only set user profile for new musicians
+                musician.user_profile = request.user.userprofile
+            musician.save()
+            return redirect('musician', musician_id=musician.id)
+    else:
+        form = MusicianForm(instance=musician)
+
+    return render(request, 'edit_musician.html', {
+        'form': form,
+        'musician': musician
+    })
 
 @login_required
 def musicians(request):
@@ -106,31 +138,29 @@ def bands(request):
     return render(request, 'bands.xhtml', data)
 
 @login_required
-def edit_venue(request,venue_id=0):
+def edit_venue(request, venue_id=0):
+    venue = None  # Initialize venue as None by default
+    
     if venue_id != 0:
-        venue =get_object_or_404(Venue, id= venue_id)
-        if not request.user.userprofile.venues_controlled.filter(id=venue_id).exists():
-            raise Http404("can only edit controlled venues")
-    if request.method == 'GET':
-        if venue_id == 0:
-            form = VenueForm
-        else:
-            form = VenueForm(instance=venue)
-    else:
-        if venue_id == 0:
-            venue = Venue.objects.create()
-        form = VenueForm(request.POST,request.FILES,instance=venue)
-        
+        venue = get_object_or_404(Venue, id=venue_id)
+        if not request.user.userprofile.venue_controlled.filter(id=venue_id).exists():
+            raise Http404("Can only edit controlled venues")
+
+    if request.method == 'POST':
+        form = VenueForm(request.POST, request.FILES, instance=venue)
         if form.is_valid():
             venue = form.save()
-            
-            request.user.userprofile.venues_controlled.add(venue)
-            return redirect("venues")
-    data={
-        'form':form,
-        'venue':venue,
-    }
-    return render(request,'edit_venue.xhtml',data)
+            if venue_id == 0:  # Only add to controlled venues if new
+                request.user.userprofile.venue_controlled.add(venue)
+            return redirect('venues')
+    else:
+        form = VenueForm(instance=venue)
+
+    return render(request, 'edit_venue.xhtml', {
+        'form': form,
+        'venue': venue,  # Now always defined
+        'is_new': venue_id == 0  # Additional context variable
+    })
 
 def _get_items_per_page(request):
     # Determine how many items to show per page, disallowing <1 or >50
