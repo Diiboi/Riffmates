@@ -10,6 +10,8 @@ class Musician(models.Model):
 
 class Venue(models.Model):
     name = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
+    picture = models.ImageField(blank=True,null=True)
     def __str__(self):
         return f"Venue(id={self.id}, name={self.name})"
     

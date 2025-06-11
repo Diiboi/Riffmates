@@ -7,6 +7,8 @@ urlpatterns = [
     path('bands/', views.bands, name='bands'),
     path('band/<int:band_id>/', views.band, name='band'),
     path('venues/', views.venues, name='venues'),
+    path('edit_venue/<int:venue_id>/', views.edit_venue, name='edit_venue'),
+    path('edit_venue/', views.edit_venue, name='edit_venue'),
     path('musician_restricted/<int:musician_id>/',views.musician_restricted,  name='musician_restricted'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),

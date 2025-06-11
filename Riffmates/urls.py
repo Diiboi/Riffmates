@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.conf import settings
+from django.conf.urls.static import static
 from home import views as home_views
 from home import views as about_views
 from home import views as homepage_views
@@ -36,3 +38,8 @@ urlpatterns = [
     path('search/', search_views.search_results, name='search_results'),  
     path('restricted_page/',band_views.restricted_page, name='restricted_page'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+             document_root = settings.MEDIA_ROOT)

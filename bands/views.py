@@ -1,4 +1,4 @@
-from django.shortcuts import render,get_object_or_404
+from django.shortcuts import render,get_object_or_404,redirect
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
@@ -6,6 +6,7 @@ from django.http import Http404
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from  bands.models import Musician, Band,Venue,UserProfile
+from bands.forms import VenueForm
 
 
 @login_required 
@@ -104,12 +105,77 @@ def bands(request):
     }
     return render(request, 'bands.xhtml', data)
 
-def venues(request):
-    all_venues = Venue.objects.all().order_by('name')
-    data = {
-        'venues': all_venues,
+@login_required
+def edit_venue(request,venue_id=0):
+    if venue_id != 0:
+        venue =get_object_or_404(Venue, id= venue_id)
+        if not request.user.userprofile.venues_controlled.filter(id=venue_id).exists():
+            raise Http404("can only edit controlled venues")
+    if request.method == 'GET':
+        if venue_id == 0:
+            form = VenueForm
+        else:
+            form = VenueForm(instance=venue)
+    else:
+        if venue_id == 0:
+            venue = Venue.objects.create()
+        form = VenueForm(request.POST,request.FILES,instance=venue)
+        
+        if form.is_valid():
+            venue = form.save()
+            
+            request.user.userprofile.venues_controlled.add(venue)
+            return redirect("venues")
+    data={
+        'form':form,
+        'venue':venue,
     }
-    return render(request, 'venues.xhtml', data)
+    return render(request,'edit_venue.xhtml',data)
+
+def _get_items_per_page(request):
+    # Determine how many items to show per page, disallowing <1 or >50
+    items_per_page = int(request.GET.get("items_per_page", 10))
+    if items_per_page < 1:
+        items_per_page = 10
+    if items_per_page > 50:
+        items_per_page = 50
+    return items_per_page
+
+def _get_page_num(request, paginator):
+    # Get current page number for Pagination, using reasonable defaults
+    page_num = int(request.GET.get("page", 1))
+    if page_num < 1:
+        page_num = 1
+    elif page_num > paginator.num_pages:
+        page_num = paginator.num_pages
+    return page_num
+@login_required
+def venues(request):
+    all_venues = Venue.objects.all().order_by("name")
+    profile = getattr(request.user, "userprofile", None)
+    
+    if profile:
+        for venue in all_venues:
+            # Mark the venue as "controlled" if the logged in user is
+            # associated with the venue
+            venue.controlled = profile.venue_controlled.filter(
+                id=venue.id
+            ).exists()
+    else:
+        # Anonymous user, can't be associated with the venue
+        for venue in all_venues:
+            venue.controlled = False
+
+    items_per_page = _get_items_per_page(request)
+    paginator = Paginator(all_venues, items_per_page)
+    page_num = _get_page_num(request, paginator)
+    page = paginator.page(page_num)
+
+    data = {
+        "venues": page.object_list,
+        "page": page,
+    }
+    return render(request, "venues.xhtml", data)
 
 
 @receiver(post_save, sender=User)
@@ -120,4 +186,5 @@ def create_user_profile(sender, **kwargs):
                 UserProfile.objects.get(user=user)
             except UserProfile.DoesNotExist:
                 UserProfile.objects.create(user=user)
-            
+                
+                

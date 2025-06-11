@@ -132,3 +132,6 @@ STATIC_URL='/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+MEDIA_ROOT = BASE_DIR.parent / 'outside/RiffMates/uploads'
+MEDIA_URL = '/media/'
