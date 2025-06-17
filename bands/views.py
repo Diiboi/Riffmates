@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.http import Http404
 from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required,user_passes_test
+from django.contrib.auth.decorators import login_required
 from  bands.models import Musician, Band,Venue,UserProfile
 from bands.forms import VenueForm,MusicianForm
 
@@ -50,7 +50,7 @@ def musician_restricted(request, musician_id):
 
 
 
-
+@login_required
 def musician(request,musician_id):
     musician = get_object_or_404(Musician,id= musician_id)
     can_edit = False
@@ -78,7 +78,7 @@ def edit_musician(request, musician_id=None):
         form = MusicianForm(request.POST, request.FILES, instance=musician)
         if form.is_valid():
             musician = form.save(commit=False)
-            if not musician_id:  # Only set user profile for new musicians
+            if not musician_id:  
                 musician.user_profile = request.user.userprofile
             musician.save()
             return redirect('musician', musician_id=musician.id)
@@ -90,11 +90,11 @@ def edit_musician(request, musician_id=None):
         'musician': musician
     })
 
-@login_required
+
 def musicians(request):
 
     all_musicians = Musician.objects.all().order_by('last_name')
-    paginator = Paginator(all_musicians, 2)
+    paginator = Paginator(all_musicians, 4)
 
     page_num = request.GET.get('page',1)
     page_num = int(page_num)
@@ -113,10 +113,14 @@ def musicians(request):
 
 def band(request, band_id):
     band = get_object_or_404(Band, id=band_id)
+    musicians = band.musicians.all().order_by('last_name', 'first_name')  # Get all musicians in this band
+    
     data = {
         'band': band,
+        'musicians': musicians,  # Pass the musicians queryset to the template
+        'member_count': musicians.count(),  # Pass the count for easy display
     }
-    return render(request, 'bands.xhtml', data)
+    return render(request, 'band_desc.xhtml', data)
 
 def bands(request):
     all_bands = Band.objects.all().order_by('name')
@@ -179,7 +183,8 @@ def _get_page_num(request, paginator):
     elif page_num > paginator.num_pages:
         page_num = paginator.num_pages
     return page_num
-@login_required
+
+
 def venues(request):
     all_venues = Venue.objects.all().order_by("name")
     profile = getattr(request.user, "userprofile", None)

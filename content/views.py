@@ -6,6 +6,7 @@ from content.forms import SeekingAdForm
 from content.models import MusicianBandChoice,SeekingAd
 from content.forms import CommentForm
 
+@login_required
 def comment(request):
     if request.method == 'GET':
         form = CommentForm()
@@ -34,7 +35,7 @@ def comment_accepted(request):
     }
     return render(request, 'general.xhtml', data)
 
-
+@login_required
 def list_ads(request):
     data ={
         'seeking_musician':SeekingAd.objects.filter(seeking=MusicianBandChoice.MUSICIAN),

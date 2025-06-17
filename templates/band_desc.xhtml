@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <!-- Band Header -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="bg-purple-800 text-white p-6">
+            <h1 class="text-3xl font-bold">{{ band.name }}</h1>
+            <div class="flex items-center mt-2 space-x-4">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    {{ band.musicians.count }} member{{ band.musicians.count|pluralize }}
+                </span>
+                {% if band.formed_year %}
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Formed {{ band.formed_year }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if band.description %}
+        <div class="p-6 border-b">
+            <h2 class="text-xl font-semibold text-purple-800 mb-3">About</h2>
+            <p class="text-gray-700 whitespace-pre-line">{{ band.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Members Section -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6 border-b">
+            <h2 class="text-2xl font-semibold text-purple-800">Band Members</h2>
+        </div>
+
+        {% if band.musicians.all %}
+        <ul class="divide-y divide-gray-200">
+            {% for musician in band.musicians.all %}
+            <li class="p-4 hover:bg-gray-50 transition-colors">
+                <a href="{% url 'musician' musician.id %}" class="flex items-center space-x-4">
+                    {% if musician.bio_pic %}
+                    <div class="flex-shrink-0 h-16 w-16 rounded-full overflow-hidden border-2 border-purple-200">
+                        <img src="{{ musician.bio_pic.url }}" alt="{{ musician.get_full_name }}" class="h-full w-full object-cover">
+                    </div>
+                    {% else %}
+                    <div class="flex-shrink-0 h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    {% endif %}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-lg font-medium text-purple-700 truncate">{{ musician.first_name }} {{ musician.last_name }}</p>
+                        {% if musician.instruments.all %}
+                        <p class="text-sm text-gray-500">
+                            {% for instrument in musician.instruments.all %}
+                            {{ instrument.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        {% endif %}
+                        {% if musician.birth %}
+                        <p class="text-sm text-gray-500">Born {{ musician.birth|date:"F j, Y" }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="p-6 text-center text-gray-500">
+            This band currently has no members.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-6">
+        <a href="{% url 'bands' %}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to all bands
+        </a>
+    </div>
+</div>
+{% endblock %}
